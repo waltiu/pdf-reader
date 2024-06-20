@@ -4,22 +4,36 @@ import * as pdfjs from 'pdfjs-dist'
 import 'pdfjs-dist/build/pdf.worker.mjs'
 import { defaultOptions } from './constant'
 import { TurnOptionsType } from './type'
+import { enumDisplay } from '@/constant/type'
+import { log } from '@/constant'
 
 
 class PdfReader {
+    options: any
     pdf: any
-    constructor() {
+    instance: any
+    currentPage: number
+    eventCallbackMap: any
+    constructor({ onPageChange }: any) {
         this.pdf = null
+        this.instance = null
+        this.currentPage = 0
+        this.eventCallbackMap = {
+            onPageChange
+        }
     }
     init(container: string, options?: TurnOptionsType) {
         const config = {
             ...defaultOptions,
             ...(options || {})
         };
-        ($(container) as any).turn(config);
+        this.options = config
+        this.instance = $(container) as any
+        this.instance.turn(config);
+        this.jump(1)
     }
 
-    
+
 
     async load(url: string) {
         return new Promise((resolve) => {
@@ -32,7 +46,6 @@ class PdfReader {
 
     async read(url: string) {
         this.pdf = await this.load(url)
-        console.log(this.pdf,'pdf')
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         const pdfPicturePath = []
@@ -54,6 +67,29 @@ class PdfReader {
 
         return pdfPicturePath
     }
+    isSingle() {
+        return this.options.display === enumDisplay.single
+    }
+    next() {
+        const page = this.currentPage + (this.isSingle() ? 1 : 2)
+        this.jump(page)
+    }
+    prev() {
+        const page = this.currentPage - (this.isSingle() ? 1 : 2)
+        this.jump(page)
 
+    }
+    jump(page: number) {
+        let newPage = page
+        if (newPage <= 0) {
+            newPage = 1
+        } else if (newPage > this.pdf._pdfInfo.numPages) {
+            newPage = this.pdf._pdfInfo.numPages
+        }
+        log("当前page：",newPage)
+        this.currentPage=newPage
+        this.eventCallbackMap?.onPageChange(newPage)
+        this.instance.turn('page', newPage);
+    }
 }
 export default PdfReader
