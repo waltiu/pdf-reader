@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from "react"
 import PdfReader from '@/lib/pdf'
 import styles from './index.module.less'
 import { getUrlParams } from "@/utils/url"
-import { InputNumber, Space } from "antd"
-import { BackwardOutlined, ForwardOutlined, VerticalLeftOutlined, VerticalRightOutlined } from "@ant-design/icons"
+import { InputNumber, Popover, Space } from "antd"
+import { BackwardOutlined, ForwardOutlined, HolderOutlined, VerticalLeftOutlined, VerticalRightOutlined } from "@ant-design/icons"
 import { VALUE_UNKNOWN } from "@/constant"
 import { enumDisplay, turnOptionsType } from "@/constant/type"
 import { getRecommendOptions } from "@/lib/pdf/constant"
+import Oper from "./oper"
 
 export const BOOK_CONTAINER_ID = 'book-container'
 
@@ -32,34 +33,70 @@ const Home = () => {
         const rOptions = await getRecommendOptions(images[0], BOOK_CONTAINER_ID, options.display)
         const newOptions = {
             ...rOptions,
-            ...options
+            ...options,
         }
-        setOptions(newOptions)
-        setLoading(false)
+        changeOptions(newOptions)
         setPages(images)
+        setLoading(false)
         setTimeout(() => {
-            bookRef.current.init('#prd-container', newOptions)
-        }, 2000);
+            if (bookRef.current) {
+                bookRef.current.init('#prd-container', options)
+            }
+        }, 1000);
+
     }
 
-    const computedStyles=()=>{
-        const styles:any={}
-        if(currentPage===1&&options.display===enumDisplay.double){
-            styles['transform']=`translateX(-25%)`
+    const changeOptions = (params: turnOptionsType) => {
+        const newOptions = {
+            ...options,
+            ...params
+        }
+        bookRef.current.setOptions(newOptions)
+        setOptions(newOptions)
+    }
+
+    const computedStyles = () => {
+        const styles: any = {}
+        if (currentPage === 1 && options.display === enumDisplay.double) {
+            styles['transform'] = `translateX(-25%)`
         }
         return styles
+    }
+
+    const changeDisplayMode = async (type: enumDisplay) => {
+        const rOptions = await getRecommendOptions(pages[0], BOOK_CONTAINER_ID, type)
+        const newOptions = {
+            ...rOptions,
+            display: type
+        }
+        changeOptions(newOptions)
+
     }
 
     useEffect(() => {
         const url = getUrlParams(window.location.href, 'path')
         setFileUrl(url)
     }, [])
+
+
+
     useEffect(() => {
         render()
     }, [fileUrl])
 
     return <div className={styles.pdf} >
-        <div className={styles.header}></div>
+        <div className={styles.header}>
+            <Popover placement="bottomLeft" title={"更多操作"} content={<Oper options={options} changeOptions={(params) => {
+                setOptions({
+                    ...options,
+                    ...params
+                })
+            }}
+                changeDisplayMode={changeDisplayMode}
+            />}>
+                <HolderOutlined className={styles.more} />
+            </Popover>
+        </div>
         <div className={styles.container} id={BOOK_CONTAINER_ID}  >
             <div id="prd-container" style={computedStyles()}>
                 {

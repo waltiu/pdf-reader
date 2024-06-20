@@ -4,11 +4,10 @@ export const defaultOptions = {
     acceleration: true, //启用硬件加速,移动端有效
     display: 'double', //显示：single=单页，double=双页，默认双页
     duration: 800,
-    gradients: !0,
-    autoCenter: !0,
+    gradients: true,
+    turnCorners: "bl,br",
+    autoCenter: true,
     elevation: 50,
-    width: 595 * 2,
-    height: "calc(100% - 32px)"
 }
 
 export const getImgUrlStyle = (url: string) => {
@@ -80,7 +79,6 @@ export const getRecommendOptions = async (imgUrl: string, containerId: string, d
         const imgStyle = await getImgUrlStyle(imgUrl)
         const container = document.getElementById(containerId)
         pageStyle = getRecommendPageStyle(imgStyle, { width: container?.clientWidth, height: container?.clientHeight }, display)
-        console.log(pageStyle, 'pageStyle')
     }
     const options = {
         acceleration: true, //启用硬件加速,移动端有效

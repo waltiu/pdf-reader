@@ -462,7 +462,6 @@
     //    **  **  --   **  **
   
     range: function(page) {
-  
       var remainingPages, left, right,
         data = this.data();
         page = page || data.tpage || data.page;
@@ -693,7 +692,6 @@
     // Gets and sets the size
   
     size: function(width, height) {
-  
       if (width && height) {
   
         var data = this.data(), pageWidth = (data.display=='double') ? width/2 : width, page;

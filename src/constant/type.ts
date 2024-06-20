@@ -5,5 +5,7 @@ export enum enumDisplay{
 
 
 export type turnOptionsType={
-    display:enumDisplay
+    display:enumDisplay,
+    width?:number,
+    height?:number,
 }

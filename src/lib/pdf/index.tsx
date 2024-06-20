@@ -2,9 +2,7 @@ import '../cores/jquery'
 import '../cores/turn'
 import * as pdfjs from 'pdfjs-dist'
 import 'pdfjs-dist/build/pdf.worker.mjs'
-import { defaultOptions } from './constant'
-import { TurnOptionsType } from './type'
-import { enumDisplay } from '@/constant/type'
+import { enumDisplay, turnOptionsType } from '@/constant/type'
 import { log } from '@/constant'
 
 
@@ -14,26 +12,46 @@ class PdfReader {
     instance: any
     currentPage: number
     eventCallbackMap: any
+    hasInit: boolean
     constructor({ onPageChange }: any) {
         this.pdf = null
         this.instance = null
         this.currentPage = 0
+        this.hasInit = false
         this.eventCallbackMap = {
             onPageChange
         }
     }
-    init(container: string, options?: TurnOptionsType) {
-        const config = {
-            ...defaultOptions,
-            ...(options || {})
-        };
-        this.options = config
+    
+    
+    init(container: string) {
         this.instance = $(container) as any
-        this.instance.turn(config);
+        this.instance.turn(this.options);
         this.jump(1)
+        this.hasInit = true
     }
 
 
+
+    setOptions(options: turnOptionsType) {
+        if (this.hasInit) {
+            if (options.display !== this.options.display) {
+                this.changeDisplay(options.display)
+            }
+            if (options.width !== this.options.width || options.height !== this.options.height) {
+                this.changeStyle(options.width, options.height)
+            }
+        }
+        this.options = options
+    }
+
+    async changeDisplay(type: enumDisplay) {
+        this.instance.turn("display", type)
+    }
+
+    async changeStyle(width?: number, height?: number) {
+        this.instance.turn("size", width, height)
+    }
 
     async load(url: string) {
         return new Promise((resolve) => {
@@ -79,15 +97,15 @@ class PdfReader {
         this.jump(page)
 
     }
+    
+    // 调整到具体页面，超过最大页码就跳到最后一页
     jump(page: number) {
         let newPage = page
-        if (newPage <= 0) {
+        if (newPage <= 0||newPage > this.pdf._pdfInfo.numPages) {
             newPage = 1
-        } else if (newPage > this.pdf._pdfInfo.numPages) {
-            newPage = this.pdf._pdfInfo.numPages
-        }
-        log("当前page：",newPage)
-        this.currentPage=newPage
+        } 
+        log("当前page：", newPage)
+        this.currentPage = newPage
         this.eventCallbackMap?.onPageChange(newPage)
         this.instance.turn('page', newPage);
     }
