@@ -37,10 +37,11 @@ const Home = () => {
         }
         changeOptions(newOptions)
         setPages(images)
-        setLoading(false)
         setTimeout(() => {
             if (bookRef.current) {
                 bookRef.current.init('#prd-container', options)
+        setLoading(false)
+
             }
         }, 1000);
 
@@ -98,18 +99,17 @@ const Home = () => {
             </Popover>
         </div>
         <div className={styles.container} id={BOOK_CONTAINER_ID}  >
+            {
+                loading&&<img src="https://p4.itc.cn/q_70/images03/20210826/76e6f5094908419fb24523196e60235f.gif" />
+            }
             <div id="prd-container" style={computedStyles()}>
-                {
-                    loading ? <img src="https://p4.itc.cn/q_70/images03/20210826/76e6f5094908419fb24523196e60235f.gif" /> : <>
                         {
                             pages.map(item => {
-                                return <div key={item}>
+                                return <div key={item} style={{opacity:loading?0:1}}>
                                     <img src={item} />
                                 </div>
                             })
                         }
-                    </>
-                }
 
             </div>
         </div>

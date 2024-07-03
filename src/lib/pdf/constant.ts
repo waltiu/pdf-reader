@@ -7,7 +7,6 @@ export const defaultOptions = {
     gradients: true,
     turnCorners: "bl,br",
     autoCenter: true,
-    elevation: 50,
 }
 
 export const getImgUrlStyle = (url: string) => {

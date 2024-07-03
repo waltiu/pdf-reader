@@ -26,11 +26,18 @@ class PdfReader {
     
     init(container: string) {
         this.instance = $(container) as any
-        this.instance.turn(this.options);
+        this.instance.turn({
+            ...this.options,
+            when: {
+                turning: (_: any, page: number) => {
+                    this.currentPage = page
+                    this.eventCallbackMap.onPageChange(page)
+                }
+            }
+        });
         this.jump(1)
         this.hasInit = true
     }
-
 
 
     setOptions(options: turnOptionsType) {
